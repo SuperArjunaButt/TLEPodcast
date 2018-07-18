@@ -14,7 +14,7 @@ public class PooperSoundController : ClickableItem {
 	// Use this for initialization
 	void Start () {
 		pstate = PlayerState.STOPPED;
-		
+		soundSource = GetComponentInChildren<AudioSource>();
 	}
 	
 	// Update is called once per frame
@@ -62,7 +62,7 @@ public class PooperSoundController : ClickableItem {
 		if(DoOrDont) {
 			Debug.Log("Rewinding");
 			soundSource.Pause();
-			soundSource.timeSamples = audio.clip.samples - 1;
+			soundSource.timeSamples = soundSource.clip.samples - 1;
  			soundSource.pitch = -1;
  			soundSource.Play();
 		}
