@@ -1,4 +1,9 @@
-﻿using System.Collections;
+﻿/*
+ *	Handles the play/pause/rewind/fast forward functions of the toilet podcast clips,
+ *	triggers the appropriate animations, and enables/disables the icons for each function. *
+ */
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -37,6 +42,13 @@ public class PooperSoundController : ClickableItem {
 		
 	}
 
+	//Handles player interaction with the toilets.
+	//Checks to see if we've clicked on the flushing handle
+	//or if we've clicked on the seat.
+	//If we clicked on the handle, play or pause depending 
+	//on the value of the PlayerState enum.
+	//If we clicked on the seat, rewind the clip or stop rewinding
+	//based on PlayerState.  
 	public override void OnPlayerClick(string objHit) {
 		//Debug.Log("In OnPlayerClick");
 		if(objHit.Contains("Handle")) {
@@ -93,9 +105,11 @@ public class PooperSoundController : ClickableItem {
 		currentIcon = pauseSymbol;
 	}
 
+	//Rewinds the clip.  Passes it a bool to see if we were already rewinding, in
+	//which case we go back to either playing the clip or staying paused.
 	void Rewind(bool DoOrDont) {
 		
-		if(DoOrDont) {
+		if(DoOrDont) { //Rewind the clip
 			if(currentIcon != null) currentIcon.SetActive(false);
 			
 			pstate = PlayerState.REWINDING;
@@ -106,31 +120,52 @@ public class PooperSoundController : ClickableItem {
 			Debug.Log("Rewinding");
 			soundSource.Pause();
 			//soundSource.timeSamples = soundSource.clip.samples - 1;
- 			soundSource.pitch = -1;
+ 			soundSource.pitch = -2;
  			soundSource.Play();
 		}
-		else {
-			currentIcon.SetActive(false);
-			currentIcon = prevIcon;
-			currentIcon.SetActive(true);
-			soundSource.pitch = 1;
-			if(currentIcon == playSymbol) {
-				pstate = PlayerState.PLAYING;
+		else { //Stop rewinding the clip
+			//From the AudioSource documentation (for 2018.2.0):
+			//"If AudioSource.clip is set to the same clip that is playing then the clip will sound like it is 
+			//re-started. AudioSource will assume any Play call will have a new audio clip to play."
+			//If we were in the play state, we need to pause the clip, change the pitch, then play (or keep it paused if we were in the pause state).
+			//Otherwise it will start from the beginning if we just call Play() after coming back from rewinding or fast forwarding.
+			soundSource.Pause();
+			soundSource.pitch = 1;			//Set the pitch back (and therefore playback rate) to normal
+			
+			currentIcon.SetActive(false);	//Disable the rewind icon
+			currentIcon = prevIcon; 		//Figure out if we were playing or pausing
+			currentIcon.SetActive(true);	//Activate whatever the old icon was (play or pause)
 
+			if(currentIcon == playSymbol) { //Update the PlayerState enum and play or pause
+				pstate = PlayerState.PLAYING;
+				soundSource.Play();
 			}
 			else if (currentIcon == pauseSymbol) {
 				pstate = PlayerState.PAUSED;
-				soundSource.Pause();
+				//soundSource.Pause();
 			}
 
-			Debug.Log("Stopping Rewind");
-			//Figure out what the old state was and switch back to it
-			//SHOULD YOU BE ABLE TO REWIND WHILE PAUSED?
+
+			Debug.Log("Stopping Rewind");			
 		}
 	}
 
 	void FastForward() {
-		//pstate = PlayerState.FASTFORWARDING;
+		
+		//Update player state
+		
+		soundSource.pitch = 2;
+		if(pstate == PlayerState.PAUSED) {
+			soundSource.Play();
+		}
+		pstate = PlayerState.FASTFORWARDING;
+
+		//Update the icon
+		prevIcon = currentIcon;
+		currentIcon.SetActive(false);
+		currentIcon = fastForwardSymbol;
+		currentIcon.SetActive(true);
+		
 	}
 
 
