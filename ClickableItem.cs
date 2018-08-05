@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ClickableItem : MonoBehaviour {
 
-	public virtual void OnPlayerClick(string objHit) {
-		
-	}
+	public virtual void OnPlayerClick(string objHit) {}
+
+	public virtual void HighlightItem() {}
 }
