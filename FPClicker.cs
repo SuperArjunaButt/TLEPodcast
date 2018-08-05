@@ -89,6 +89,7 @@ public class FPClicker : MonoBehaviour {
 		//TODO: Change GetComponent call to the more efficient version
 		//Set this in place so it won't move around on collision
 		grabbedObject.GetComponent<Rigidbody>().useGravity = false;
+		grabbedObject.GetComponent<Rigidbody>().isKinematic = false;
 		grabbedObject.GetComponent<Rigidbody>().drag = Mathf.Infinity;
 		grabbedObject.GetComponent<Rigidbody>().angularDrag = Mathf.Infinity;
 		//We apply the same rotation our main object (Camera) has
@@ -108,7 +109,7 @@ public class FPClicker : MonoBehaviour {
 	}
 
 
-	//TODO: Do we add another function, Use(), for when we want to use the item in a spot and not throw it?
+
 	private void Use(Transform useSpot) {
 			GameObject usedItem = grabbedObject;
 			guide.GetChild(0).parent=null;
