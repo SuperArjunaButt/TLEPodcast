@@ -13,6 +13,7 @@ public class FPClicker : MonoBehaviour {
 	public Transform guide;
 	private GameObject grabbedObject;
 
+	private bool itemInUse;
 	public float speed; 
 
 	[SerializeField] private float FPCRange;
@@ -21,6 +22,7 @@ public class FPClicker : MonoBehaviour {
 		cam = GetComponent<Camera>();
 		clickedItem = null;
 		canGrab = true;
+		itemInUse = false;
 	}
 	
 	// Update is called once per frame
@@ -45,7 +47,7 @@ public class FPClicker : MonoBehaviour {
 						grabbedObject = itm;
 					if(!canGrab) {
 						ThrowDrop();
-						grabbedObject = itm;
+						grabbedObject = itm; //Reset 'cause ThrowDrop() nulls out grabbedObject
 						Pickup();
 					}
 					else {
@@ -53,6 +55,14 @@ public class FPClicker : MonoBehaviour {
 					}
 				 
 
+				}
+
+				if(itm.tag == "UseSpot") {
+					if(!canGrab && grabbedObject && clickedItem.CanBeUsed())
+					{
+						Debug.Log("Clicked UseSpot");
+						Use(itm.transform);
+					}
 				}
 
 			}
@@ -77,6 +87,7 @@ public class FPClicker : MonoBehaviour {
 
 		//Set gravity to false while holding it
 		//TODO: Change GetComponent call to the more efficient version
+		//Set this in place so it won't move around on collision
 		grabbedObject.GetComponent<Rigidbody>().useGravity = false;
 		grabbedObject.GetComponent<Rigidbody>().drag = Mathf.Infinity;
 		grabbedObject.GetComponent<Rigidbody>().angularDrag = Mathf.Infinity;
@@ -89,12 +100,28 @@ public class FPClicker : MonoBehaviour {
 		//TODO: Disable the collider on the object just in case it causes weird physics shit?
 
 		canGrab = false;
+		if(grabbedObject.GetComponentInParent<GrabbableItem>().inUse) {
+			grabbedObject.GetComponentInParent<GrabbableItem>().objectUsingThis.UnUse(grabbedObject.name);
+			grabbedObject.GetComponentInParent<GrabbableItem>().inUse=false;
+		}
 
 	}
 
 
 	//TODO: Do we add another function, Use(), for when we want to use the item in a spot and not throw it?
-	private void Use() {}
+	private void Use(Transform useSpot) {
+			GameObject usedItem = grabbedObject;
+			guide.GetChild(0).parent=null;
+			usedItem.transform.position = useSpot.position + usedItem.GetComponent<GrabbableItem>().offset;
+			usedItem.transform.rotation = useSpot.rotation;
+			usedItem.GetComponent<Rigidbody>().isKinematic=true;
+			usedItem.GetComponent<GrabbableItem>().inUse=true;
+			itemInUse = true;
+			canGrab = true;  //We want to be able to grab another object after putting the old one into use
+			usedItem.GetComponent<GrabbableItem>().objectUsingThis = useSpot.gameObject.GetComponentInParent<ClickableItem>();
+			useSpot.gameObject.GetComponentInParent<ClickableItem>().OnUse(usedItem.name);
+
+	}
 	private void ThrowDrop() {
 		if(!grabbedObject) return;
 		Rigidbody rb = guide.GetChild(0).gameObject.GetComponent<Rigidbody>();
