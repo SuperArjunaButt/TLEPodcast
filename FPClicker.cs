@@ -119,6 +119,7 @@ public class FPClicker : MonoBehaviour {
 			usedItem.GetComponent<GrabbableItem>().inUse=true;
 			itemInUse = true;
 			canGrab = true;  //We want to be able to grab another object after putting the old one into use
+			grabbedObject = null;
 			usedItem.GetComponent<GrabbableItem>().objectUsingThis = useSpot.gameObject.GetComponentInParent<ClickableItem>();
 			useSpot.gameObject.GetComponentInParent<ClickableItem>().OnUse(usedItem.name);
 
