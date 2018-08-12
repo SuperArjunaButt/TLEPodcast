@@ -73,6 +73,13 @@ public class PooperSoundController : ClickableItem {
 			else if(currentState == PlayerState.PLAYING) {
 				Pause();
 			}
+			else if (currentState == PlayerState.STOPPED) {
+				soundSource.Play();
+				playSymbol.SetActive(true);
+				currentIcon = playSymbol;
+				currentState = PlayerState.PLAYING;
+				prevState = PlayerState.STOPPED;
+			}
 			else if(currentState == PlayerState.PAUSED) {
 
 				Play();
